@@ -23,7 +23,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Future<void> _fetchQuestions() async {
     final api = ApiService();
-    List<Question> questions = await api.fetchQuestions();
+    final questions = await api.fetchQuestions();
     setState(() {
       _questions = questions;
     });
@@ -76,50 +76,86 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
+  Widget _answerButtons() {
+    final question = _questions[_currentQuestionIndex];
+    List<Widget> buttons = [];
+
+    buttons.add(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "Question ${_currentQuestionIndex + 1}/${_questions.length}",
+            style: TextStyle(fontSize: 18),
+          ),
+          SizedBox(height: 10),
+          Text(
+            question.question,
+            style: const TextStyle(fontSize: 20),
+          ),
+          SizedBox(height: 18),
+        ]
+      )
+    );
+
+    for (var answer in question.answers) {
+      Color? color;
+
+      if (_answered) {
+        if (answer == question.correctAnswer) {
+          color = Colors.green;
+        } else {
+          color = Colors.red;
+        }
+      }
+
+      buttons.add(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ElevatedButton(
+              onPressed: () => _answerQuestion(answer),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+              ),
+              child: Text(answer),
+            ),
+            SizedBox(height: 18),
+          ]
+        )
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: buttons,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Quiz Game"),
       ),
-      body: _questions.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    "Question ${_currentQuestionIndex + 1}/${_questions.length}",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    _questions[_currentQuestionIndex].question,
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  SizedBox(height: 20),
-                  ..._questions[_currentQuestionIndex].answers.map((answer) {
-                    return ElevatedButton(
-                      onPressed: () => _answerQuestion(answer),
-                      child: Text(answer),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _answered
-                            ? (answer == _questions[_currentQuestionIndex].correctAnswer
-                                ? Colors.green
-                                : Colors.red)
-                            : null,
-                      ),
-                    );
-                  }).toList(),
-                  Spacer(),
-                  ElevatedButton(
-                    onPressed: _answered ? _nextQuestion : null,
-                    child: Text("Next"),
-                  ),
-                ],
-              ),
-            )
+      body: Column(
+        children: [
+          _questions.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : _answerButtons(),
+          FloatingActionButton(
+            onPressed:() {
+              if (_answered) {
+                _nextQuestion();
+              }
+            },
+            child: Text("Next"),
+          )
+        ],
+      )
     );
   }
 }
