@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:api_quiz_app/question.dart';
+import '../question.dart';
 import 'package:http/http.dart';
 
 class ApiService {

@@ -12,7 +12,6 @@ class Question {
 
     List<String> allAnswers = List<String>.from(json['incorrect_answers']);
     allAnswers.add(json['correct_answer']);
-    allAnswers.shuffle();
 
     allAnswers = allAnswers.map((a) => unescape.convert(a)).toList();
     allAnswers.shuffle();
